@@ -1,0 +1,142 @@
+# ─── Environment Variables ───────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
+
+# ─── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.installed.cfg
+*.egg-link
+*.pyc
+
+# Package init files (auto-generated / empty markers)
+__init__.py
+
+# ─── Virtual Environments ────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+Pipfile.lock
+
+# ─── Testing ─────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+nosetests.xml
+test-results/
+
+# ─── Type Checking ───────────────────────────────────────────────────────────
+.mypy_cache/
+.pyright/
+.ruff_cache/
+pyrightconfig.json
+
+# ─── IDE / Editors ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ─── OS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+*.out
+*.err
+
+# ─── AI / ML ─────────────────────────────────────────────────────────────────
+# ChromaDB / vector stores
+chroma_db/
+*.chroma/
+vector_store/
+db/
+*.faiss
+*.index
+
+# Model weights & embeddings
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+models/
+embeddings/
+
+# LangChain / LangGraph cache
+.langchain/
+langchain_cache/
+langgraph_cache/
+.langgraph/
+
+# OpenAI / Anthropic response caches
+.cache/
+cache/
+response_cache/
+
+# ─── Jupyter Notebooks ───────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ─── uv ──────────────────────────────────────────────────────────────────────
+# requirements.txt is replaced by pyproject.toml + uv.lock
+requirements.txt
+# uv.lock should be committed — do NOT add it here
+
+# ─── Distribution / Packaging ────────────────────────────────────────────────
+*.whl
+*.tar.gz
+*.zip
+MANIFEST
+site/
+
+# ─── Secrets / Credentials ───────────────────────────────────────────────────
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+service_account*.json
+*_credentials.json
+
+# ─── Database ────────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ─── Temporary Files ─────────────────────────────────────────────────────────
+*.tmp
+*.temp
+tmp/
+temp/
+.temp/
