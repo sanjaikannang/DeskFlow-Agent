@@ -16,6 +16,8 @@ _mongo_client: motor.motor_asyncio.AsyncIOMotorClient | None = None
 def _get_mongo_client() -> motor.motor_asyncio.AsyncIOMotorClient:
     global _mongo_client
     if _mongo_client is None:
+        if not MONGODB_URI:
+            raise EnvironmentError("MONGODB_URI is not set — required to log traces to MongoDB.")
         _mongo_client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
     return _mongo_client
 

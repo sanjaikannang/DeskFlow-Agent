@@ -35,7 +35,7 @@ deskflow-backend
 │  START                                              │
 │    │                                                │
 │    ▼                                                │
-│  classifier_node  ──── GPT-4o extracts:             │
+│  classifier_node  ──── Groq/Gemini extracts:         │
 │    │                   category, action_type,       │
 │    │                   tools_mentioned, severity    │
 │    ▼                                                │
@@ -45,7 +45,7 @@ deskflow-backend
 │    ▼                                                │
 │  router_node ──────── Decision matrix (pure Python) │
 │    │                                                │
-│    ├─ AUTO_RESOLVE ─► resolver_node (GPT-4o fix)    │
+│    ├─ AUTO_RESOLVE ─► resolver_node (LLM fix)       │
 │    ├─ L2_APPROVAL  ─► approval_node (payload build) │
 │    └─ L1_ESCALATE  ─► escalation_node (brief gen)   │
 │                  │                                  │
@@ -70,7 +70,39 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-### 2. Clone and install dependencies
+> **Windows — PATH fix:** After install, run this in each new terminal session until you add it permanently to System Environment Variables:
+> ```powershell
+> $env:Path = "C:\Users\$env:USERNAME\.local\bin;$env:Path"
+> ```
+
+### 2. Install Ollama (for embeddings)
+
+Download and install from **https://ollama.com**, then pull the embedding model:
+
+```bash
+ollama pull qwen3-embedding:0.6b
+```
+
+Ollama runs locally — no API key, no cost.
+
+> **Windows — PATH fix:** If `ollama` is not recognized after install, run:
+> ```powershell
+> $env:Path = "C:\Users\$env:USERNAME\AppData\Local\Programs\Ollama;$env:Path"
+> ```
+> To make both `uv` and `ollama` permanent, add these two paths to **System Environment Variables → User Path**:
+> - `C:\Users\<your-username>\.local\bin`
+> - `C:\Users\<your-username>\AppData\Local\Programs\Ollama`
+
+### 3. Get a free LLM API key (pick one)
+
+| Provider | Free tier | Sign up |
+|---|---|---|
+| **Groq** | ~14,400 req/day — Llama 3.3 70b | console.groq.com |
+| **Gemini** | 1M tokens/day — Gemini 2.0 Flash | aistudio.google.com |
+
+The agent auto-detects which provider to use — whichever key you set in `.env` wins. If both are set, Groq takes priority.
+
+### 4. Clone and install dependencies
 
 ```bash
 git clone <repo-url>
@@ -78,28 +110,24 @@ cd deskflow-agent
 uv sync --dev
 ```
 
-`uv sync` creates `.venv` automatically, resolves, and installs all dependencies (including dev) from `uv.lock`.
-
-### 3. Configure environment
+### 5. Configure environment
 
 ```bash
 cp .env.example .env
-# Edit .env with your API keys
+# Edit .env — set GROQ_API_KEY or GEMINI_API_KEY
 ```
 
-Required:
-- `OPENAI_API_KEY` — OpenAI API key (GPT-4o + text-embedding-3-small)
-- `GITHUB_TOKEN` — GitHub Personal Access Token with `admin:org` scope
-- `GITHUB_ORG` — Your GitHub organization name
-- `MONGODB_URI` — MongoDB connection string
+Optional (only needed for full agent runs):
+- `GITHUB_TOKEN` + `GITHUB_ORG` — required when agent provisions GitHub org access
+- `MONGODB_URI` — required to save ticket traces to MongoDB
 
-### 4. Seed ChromaDB
+### 6. Seed ChromaDB
 
 ```bash
 uv run python -m deskflow_agent.rag.seed_data
 ```
 
-This seeds 30+ past resolved tickets and 5 IT runbooks into ChromaDB for RAG retrieval.
+This seeds 32 past resolved tickets and 5 IT runbooks into ChromaDB for RAG retrieval.
 
 ---
 

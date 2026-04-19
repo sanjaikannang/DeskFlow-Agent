@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -16,19 +15,34 @@ def _require(key: str) -> str:
 
 
 def _optional(key: str, default: str) -> str:
-    return os.getenv(key, default)
+    return os.getenv(key) or default
 
 
-# --- Required ---
-OPENAI_API_KEY: str = _require("OPENAI_API_KEY")
-GITHUB_TOKEN: str = _require("GITHUB_TOKEN")
-GITHUB_ORG: str = _require("GITHUB_ORG")
-MONGODB_URI: str = _require("MONGODB_URI")
+# --- LLM Provider (auto-detected from whichever API key is set) ---
+GROQ_API_KEY: str = _optional("GROQ_API_KEY", "")
+GEMINI_API_KEY: str = _optional("GEMINI_API_KEY", "")
 
-# --- Optional with defaults ---
+if GROQ_API_KEY:
+    LLM_PROVIDER: str = "groq"
+    LLM_MODEL: str = _optional("LLM_MODEL", "llama-3.3-70b-versatile")
+elif GEMINI_API_KEY:
+    LLM_PROVIDER: str = "gemini"
+    LLM_MODEL: str = _optional("LLM_MODEL", "gemini-2.0-flash")
+else:
+    LLM_PROVIDER: str = ""
+    LLM_MODEL: str = _optional("LLM_MODEL", "")
+
+# --- Embeddings via Ollama (local) ---
+OLLAMA_BASE_URL: str = _optional("OLLAMA_BASE_URL", "http://localhost:11434")
+EMBEDDING_MODEL: str = _optional("EMBEDDING_MODEL", "qwen3-embedding:0.6b")
+
+# --- Runtime-only (validated inside the feature that uses them) ---
+GITHUB_TOKEN: str = _optional("GITHUB_TOKEN", "")
+GITHUB_ORG: str = _optional("GITHUB_ORG", "")
+MONGODB_URI: str = _optional("MONGODB_URI", "")
+
+# --- Storage ---
 CHROMA_PERSIST_DIR: str = _optional("CHROMA_PERSIST_DIR", "./chroma_db")
-EMBEDDING_MODEL: str = _optional("EMBEDDING_MODEL", "text-embedding-3-small")
-LLM_MODEL: str = _optional("LLM_MODEL", "gpt-4o")
 RAG_CONFIDENCE_THRESHOLD: float = float(_optional("RAG_CONFIDENCE_THRESHOLD", "0.80"))
 
 MONGO_DB_NAME: str = _optional("MONGO_DB_NAME", "deskflow")

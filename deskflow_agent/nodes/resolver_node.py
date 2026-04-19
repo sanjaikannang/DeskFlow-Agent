@@ -3,9 +3,7 @@ from __future__ import annotations
 import logging
 import time
 
-from openai import AsyncOpenAI
-
-from deskflow_agent.config import LLM_MODEL, OPENAI_API_KEY
+from deskflow_agent.llm import chat_completion
 from deskflow_agent.prompts.resolver_prompt import (
     RESOLVER_SYSTEM_PROMPT,
     RESOLVER_USER_TEMPLATE,
@@ -13,15 +11,6 @@ from deskflow_agent.prompts.resolver_prompt import (
 from deskflow_agent.state import AgentState
 
 logger = logging.getLogger(__name__)
-
-_client: AsyncOpenAI | None = None
-
-
-def _get_client() -> AsyncOpenAI:
-    global _client
-    if _client is None:
-        _client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    return _client
 
 
 async def resolver_node(state: AgentState) -> AgentState:
@@ -43,16 +32,13 @@ async def resolver_node(state: AgentState) -> AgentState:
             rag_resolution=rag_resolution,
         )
 
-        response = await _get_client().chat.completions.create(
-            model=LLM_MODEL,
-            messages=[
+        agent_response = await chat_completion(
+            [
                 {"role": "system", "content": RESOLVER_SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},
             ],
             temperature=0.3,
         )
-
-        agent_response = response.choices[0].message.content or ""
 
         elapsed = round((time.monotonic() - start) * 1000)
         logger.info("[resolver_node] DONE in %dms — response length=%d", elapsed, len(agent_response))

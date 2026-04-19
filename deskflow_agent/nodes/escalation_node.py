@@ -4,22 +4,11 @@ import json
 import logging
 import time
 
-from openai import AsyncOpenAI
-
-from deskflow_agent.config import LLM_MODEL, OPENAI_API_KEY
+from deskflow_agent.llm import chat_completion
 from deskflow_agent.prompts.resolver_prompt import ESCALATION_SUMMARY_PROMPT
 from deskflow_agent.state import AgentState
 
 logger = logging.getLogger(__name__)
-
-_client: AsyncOpenAI | None = None
-
-
-def _get_client() -> AsyncOpenAI:
-    global _client
-    if _client is None:
-        _client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    return _client
 
 
 async def _generate_escalation_brief(state: AgentState) -> dict:
@@ -34,17 +23,16 @@ async def _generate_escalation_brief(state: AgentState) -> dict:
             f"RAG confidence: {state.get('rag_confidence', 0.0):.2f}\n"
             f"Closest past resolution found:\n{rag_resolution}"
         )
-        response = await _get_client().chat.completions.create(
-            model=LLM_MODEL,
-            messages=[
+        raw_json = await chat_completion(
+            [
                 {"role": "system", "content": ESCALATION_SUMMARY_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            response_format={"type": "json_object"},
+            json_mode=True,
             temperature=0.1,
             max_tokens=300,
         )
-        return json.loads(response.choices[0].message.content or "{}")
+        return json.loads(raw_json)
     except Exception as exc:
         logger.warning("[escalation_node] Brief generation failed: %s", exc)
         return {

@@ -20,7 +20,11 @@ async def invite_to_github_org(
     POST https://api.github.com/orgs/{org}/invitations
     Returns: {success: bool, message: str, invitation_id: str}
     """
+    if not GITHUB_TOKEN:
+        raise EnvironmentError("GITHUB_TOKEN is not set — required to call the GitHub API.")
     target_org = org or GITHUB_ORG
+    if not target_org:
+        raise EnvironmentError("GITHUB_ORG is not set — required to invite users to a GitHub org.")
     start = time.monotonic()
 
     headers = {

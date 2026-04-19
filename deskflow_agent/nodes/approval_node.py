@@ -3,9 +3,7 @@ from __future__ import annotations
 import logging
 import time
 
-from openai import AsyncOpenAI
-
-from deskflow_agent.config import LLM_MODEL, OPENAI_API_KEY
+from deskflow_agent.llm import chat_completion
 from deskflow_agent.prompts.resolver_prompt import APPROVAL_SUMMARY_PROMPT
 from deskflow_agent.prompts.onboarding_tools_map import (
     build_offboarding_checklist,
@@ -14,15 +12,6 @@ from deskflow_agent.prompts.onboarding_tools_map import (
 from deskflow_agent.state import AgentState
 
 logger = logging.getLogger(__name__)
-
-_client: AsyncOpenAI | None = None
-
-
-def _get_client() -> AsyncOpenAI:
-    global _client
-    if _client is None:
-        _client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    return _client
 
 
 async def _generate_summary(state: AgentState) -> str:
@@ -34,16 +23,14 @@ async def _generate_summary(state: AgentState) -> str:
             f"Action type: {state.get('action_type', '')}\n"
             f"Tools: {', '.join(state.get('tools_mentioned') or [])}"
         )
-        response = await _get_client().chat.completions.create(
-            model=LLM_MODEL,
-            messages=[
+        return await chat_completion(
+            [
                 {"role": "system", "content": APPROVAL_SUMMARY_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.2,
             max_tokens=200,
         )
-        return response.choices[0].message.content or ""
     except Exception as exc:
         logger.warning("[approval_node] Summary generation failed: %s", exc)
         return f"Access request for {state.get('employee_name', '')} — see ticket for details."
